@@ -15,6 +15,9 @@ HeartBeat addresses the complexity and accessibiiity challenges of current healt
 
 ## Tech Stack
 
-**FrontEnd:** HTML5, CSS3, JavaScript
-**BackEnd:** Python
-**Database:** MySQL
+**1. FrontEnd:** 
+	HTML5, CSS3, JavaScript
+**2. BackEnd:**
+	Python
+**3. Database:**
+	MySQL
