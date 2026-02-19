@@ -85,6 +85,7 @@ a {
     text-align: center;
     padding: var(--spacing-xl);
     background-color: var(--white);
+    overflow: hidden;
 }
 
 /* --- Logo --- */
@@ -92,9 +93,11 @@ a {
     margin-bottom: var(--spacing-lg);
 }
 
-.heart-icon {
+.heart-logo {
     width: 150px;
-    height: 150px;
+    height: auto;
+    max-width: 150px;
+    object-fit: contain;
 }
 
 /* --- App Name --- */
@@ -172,15 +175,20 @@ a {
 }
 
 /* ===== RESPONSIVE ===== */
-@media (min-width: 768px) {
-    /* --- Logo --- */
-    .landing-logo {
-        margin-bottom: var(--spacing-lg);
-    }
 
+/* --- Small Mobile --- */
+@media (max-width: 480px) {
     .heart-logo {
-        width: 150px;
-        height: auto;
+        width: 120px;
+        max-width: 120px;
+    }
+}
+
+/* --- Tablet & Desktop --- */
+@media (min-width: 768px) {
+    .heart-logo { /*changes logo size */
+        width: 180px;
+        max-width: 180px;
     }
 
     .landing-title {
