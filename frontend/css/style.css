@@ -41,6 +41,14 @@
 
     /* Transitions */
     --transition-normal: 0.3s ease;
+
+    /* Page Accent Colours */
+    --accent-appointments: #00BF7D;
+    --accent-history: #0073E6;
+    --accent-prescriptions: #8BABF1;
+    --accent-mental: #90D8B2;
+    --accent-account: #8DD2DD;
+    --accent-messages: #2546F0;
 }
 
 /* ===== RESET & BASE ===== */
@@ -174,9 +182,8 @@ a {
     padding: var(--spacing-md) var(--spacing-xl);
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== LANDING RESPONSIVE ===== */
 
-/* --- Small Mobile --- */
 @media (max-width: 480px) {
     .heart-logo {
         width: 120px;
@@ -184,9 +191,8 @@ a {
     }
 }
 
-/* --- Tablet & Desktop --- */
 @media (min-width: 768px) {
-    .heart-logo { /*changes logo size */
+    .heart-logo {
         width: 180px;
         max-width: 180px;
     }
@@ -342,45 +348,809 @@ a {
 }
 
 /* ==========================================
-   DASHBOARD
+   TOP BANNER
    ========================================== */
 
-.dashboard {
-    min-height: 100vh;
-    padding: var(--spacing-xl);
-    background-color: var(--off-white);
+.top-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    text-align: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
 }
 
-.dashboard-header {
+/* ==========================================
+   NAVBAR
+   ========================================== */
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-xl);
+    background-color: var(--white);
+    border-bottom: 1px solid var(--light-grey);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* --- Logo --- */
+.nav-logo-img {
+    height: 50px;
+    width: auto;
+}
+
+/* --- Nav Links (visible by default on desktop) --- */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.nav-link {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--dark-grey);
+    transition: color var(--transition-normal);
+    white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--primary);
+}
+
+.nav-link-highlight {
+    background-color: var(--primary);
+    color: var(--white) !important;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+}
+
+.nav-link-highlight:hover {
+    background-color: var(--primary-dark);
+    color: var(--white) !important;
+}
+
+/* --- Nav Right (profile icon) --- */
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* --- Profile Icon --- */
+.nav-profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color var(--transition-normal);
+}
+
+.nav-profile-icon:hover {
+    background-color: var(--primary-dark);
+}
+
+/* --- Mobile Menu Button (hidden on desktop) --- */
+.nav-mobile-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    color: var(--dark-grey);
+}
+
+/* --- Mobile Menu (hidden by default) --- */
+.nav-mobile-menu {
+    display: none;
+    flex-direction: column;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--light-grey);
+    padding: var(--spacing-md) var(--spacing-xl);
+    gap: var(--spacing-sm);
+}
+
+.nav-mobile-menu.open {
+    display: flex;
+}
+
+.nav-mobile-link {
+    font-size: var(--font-size-base);
+    color: var(--dark-grey);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--off-white);
+    transition: color var(--transition-normal);
+}
+
+.nav-mobile-link:hover,
+.nav-mobile-link.active {
+    color: var(--primary);
+}
+
+.nav-mobile-logout {
+    color: #cc0000;
+    border-bottom: none;
+    margin-top: var(--spacing-sm);
+}
+
+/* ==========================================
+   DASHBOARD MAIN
+   ========================================== */
+
+.dash-main {
+    padding: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Welcome --- */
+.dash-welcome {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-xl);
 }
 
-.dashboard-header h1 {
+.dash-welcome h1 {
     font-size: var(--font-size-xl);
     color: var(--black);
 }
+
+.dash-welcome p {
+    font-size: var(--font-size-base);
+    color: var(--grey);
+    margin-top: var(--spacing-xs);
+}
+
+.dash-logout-btn {
+    white-space: nowrap;
+}
+
+.dash-flash {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ==========================================
+   ACTION CARDS
+   ========================================== */
+
+.action-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    transition: all var(--transition-normal);
+    min-height: 180px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(78, 205, 196, 0.35);
+}
+
+.action-card-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: var(--spacing-md);
+    overflow: hidden;
+}
+
+.action-card-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.action-card-title {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--black);
+}
+
+/* ==========================================
+   NOTIFICATIONS
+   ========================================== */
+
+.dash-notifications {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dash-notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.dash-notifications-header h2 {
+    font-size: var(--font-size-lg);
+    color: var(--black);
+}
+
+.dash-see-all {
+    font-size: var(--font-size-sm);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.dash-see-all:hover {
+    text-decoration: underline;
+}
+
+.dash-notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--off-white);
+}
+
+.dash-notification-item:last-child {
+    border-bottom: none;
+}
+
+.dash-notification-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.dash-notification-item p {
+    font-size: var(--font-size-sm);
+    color: var(--dark-grey);
+}
+
+/* ==========================================
+   BOTTOM NAV (Mobile Only — hidden on desktop)
+   ========================================== */
+
+.bottom-nav {
+    display: none;
+}
+
+.bottom-nav a {
+    display: none;
+}
+
+/* ==========================================
+   BUTTON VARIANTS
+   ========================================== */
 
 .btn-sm {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-sm);
 }
 
-.dashboard-card {
-    background-color: var(--white);
-    padding: var(--spacing-xl);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+/* --- Tablet & Below (768px) --- */
+@media (max-width: 768px) {
+
+    /* Hide desktop nav links, show mobile hamburger */
+    .nav-links,
+    .nav-right {
+        display: none;
+    }
+
+    .nav-mobile-btn {
+        display: block;
+    }
+
+    .top-banner {
+        font-size: 12px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    /* Dashboard */
+    .dash-main {
+        padding: var(--spacing-lg) var(--spacing-md);
+        padding-bottom: 100px;
+    }
+
+    .dash-welcome h1 {
+        font-size: var(--font-size-lg);
+    }
+
+    .dash-logout-btn {
+        display: none;
+    }
+
+    /* Action Cards */
+    .action-cards {
+        gap: var(--spacing-md);
+    }
+
+    .action-card {
+        min-height: 150px;
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .action-card-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .action-card-title {
+        font-size: var(--font-size-sm);
+    }
+
+    /* Bottom Nav — show on mobile */
+    .bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: var(--white);
+        border-top: 1px solid var(--light-grey);
+        padding: var(--spacing-sm) 0;
+        z-index: 100;
+    }
+
+    .bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: 11px;
+        color: var(--grey);
+        transition: color var(--transition-normal);
+    }
+
+    .bottom-nav a svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .bottom-nav a.active {
+        color: var(--primary);
+    }
+
+    .bottom-nav a:hover {
+        color: var(--primary);
+    }
 }
 
-.dashboard-card h2 {
+/* --- Desktop (1024px+) --- */
+@media (min-width: 1024px) {
+    .action-cards {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .action-card {
+        min-height: 200px;
+    }
+}
+
+/* ==========================================
+   INDIVIDUAL PAGES — Shared Layout
+   ========================================== */
+
+.page-main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+    padding-bottom: 100px;
+}
+
+/* --- Page Header --- */
+.page-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.page-header h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: var(--spacing-xs);
+}
+
+.page-header p {
+    font-size: var(--font-size-base);
+    color: var(--grey);
+}
+
+/* --- Page Accent Bar --- */
+.page-accent-bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: var(--spacing-xl);
+}
+
+.accent-appointments { background-color: var(--accent-appointments); }
+.accent-history { background-color: var(--accent-history); }
+.accent-prescriptions { background-color: var(--accent-prescriptions); }
+.accent-mental { background-color: var(--accent-mental); }
+.accent-account { background-color: var(--accent-account); }
+.accent-messages { background-color: var(--accent-messages); }
+
+/* --- Page Cards --- */
+.page-card {
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: var(--spacing-lg);
+}
+
+.page-card h2 {
     font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-sm);
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: var(--spacing-md);
+}
+
+.page-card p {
+    font-size: var(--font-size-base);
+    color: var(--dark-grey);
+    line-height: 1.7;
+}
+
+/* --- Info List (for account details, etc.) --- */
+.info-list {
+    list-style: none;
+    padding: 0;
+}
+
+.info-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--off-white);
+    font-size: var(--font-size-base);
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--dark-grey);
+}
+
+.info-value {
     color: var(--black);
 }
 
-.dashboard-card p {
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-2xl) var(--spacing-xl);
     color: var(--grey);
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-state h3 {
+    font-size: var(--font-size-lg);
+    color: var(--dark-grey);
+    margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+    font-size: var(--font-size-sm);
+    color: var(--grey);
+}
+
+/* --- Page Buttons --- */
+.btn-page {
+    display: inline-block;
+    padding: 12px var(--spacing-xl);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border: none;
+    color: var(--white);
+    text-align: center;
+    margin-top: var(--spacing-md);
+}
+
+.btn-appointments { background-color: var(--accent-appointments); }
+.btn-appointments:hover { background-color: #00a86b; transform: translateY(-2px); }
+
+.btn-history { background-color: var(--accent-history); }
+.btn-history:hover { background-color: #005bb5; transform: translateY(-2px); }
+
+.btn-prescriptions { background-color: var(--accent-prescriptions); }
+.btn-prescriptions:hover { background-color: #7a9ae0; transform: translateY(-2px); }
+
+.btn-mental { background-color: var(--accent-mental); }
+.btn-mental:hover { background-color: #7ac9a0; transform: translateY(-2px); }
+
+.btn-account { background-color: var(--accent-account); }
+.btn-account:hover { background-color: #7ac2cd; transform: translateY(-2px); }
+
+.btn-messages { background-color: var(--accent-messages); }
+.btn-messages:hover { background-color: #1a35c0; transform: translateY(-2px); }
+
+/* --- Message List --- */
+.message-item {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--off-white);
+}
+
+.message-item:last-child {
+    border-bottom: none;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--accent-messages);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+}
+
+.message-content {
+    flex: 1;
+}
+
+.message-content h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 2px;
+}
+
+.message-content p {
+    font-size: var(--font-size-sm);
+    color: var(--grey);
+}
+
+.message-time {
+    font-size: 12px;
+    color: var(--grey);
+    white-space: nowrap;
+}
+
+/* --- Mood Tracker (Mental Health) --- */
+.mood-options {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--spacing-md);
+}
+
+.mood-btn {
+    font-size: 36px;
+    background: none;
+    border: 2px solid var(--light-grey);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.mood-btn:hover {
+    border-color: var(--accent-mental);
+    transform: scale(1.1);
+    background-color: #e8f8f0;
+}
+
+/* --- Responsive Pages --- */
+@media (max-width: 768px) {
+    .page-main {
+        padding: var(--spacing-lg) var(--spacing-md);
+        padding-bottom: 100px;
+    }
+
+    .page-header h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .info-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+}
+
+/* ==========================================
+   FORMS — Page Forms
+   ========================================== */
+
+.page-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+}
+
+.page-form select,
+.page-form textarea {
+    width: 100%;
+    padding: 12px var(--spacing-md);
+    border: 2px solid var(--light-grey);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-family: var(--font-family);
+    color: var(--black);
+    background-color: var(--white);
+    transition: border-color var(--transition-normal);
+}
+
+.page-form select:focus,
+.page-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.page-form textarea {
+    resize: vertical;
+}
+
+/* ==========================================
+   RECORD ITEMS
+   ========================================== */
+
+.record-item {
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid var(--off-white);
+}
+
+.record-item:last-child {
+    border-bottom: none;
+}
+
+.record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.record-header h3 {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--black);
+}
+
+.record-item p {
+    font-size: var(--font-size-sm);
+    color: var(--dark-grey);
+    margin-top: var(--spacing-xs);
+}
+
+/* --- Badges --- */
+.record-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.badge-upcoming {
+    background-color: #e6f9f0;
+    color: #00a86b;
+}
+
+.badge-completed {
+    background-color: #e6f0ff;
+    color: #0073E6;
+}
+
+.badge-cancelled {
+    background-color: #ffe6e6;
+    color: #cc0000;
+}
+
+.badge-type {
+    background-color: #e6f0ff;
+    color: #0073E6;
+}
+
+.badge-allergy {
+    background-color: #fff3e6;
+    color: #cc7a00;
+}
+
+.badge-mood-great {
+    background-color: #e6f9f0;
+    color: #00a86b;
+}
+
+.badge-mood-good {
+    background-color: #e6f9f0;
+    color: #00a86b;
+}
+
+.badge-mood-okay {
+    background-color: #fff9e6;
+    color: #997a00;
+}
+
+.badge-mood-not_great {
+    background-color: #fff3e6;
+    color: #cc7a00;
+}
+
+.badge-mood-struggling {
+    background-color: #ffe6e6;
+    color: #cc0000;
+}
+
+/* --- Cancel Button --- */
+.btn-cancel {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #cc0000;
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    margin-top: var(--spacing-sm);
+    text-align: center;
+}
+
+.btn-cancel:hover {
+    background-color: #aa0000;
+    transform: translateY(-2px);
+}
+
+/* --- Responsive Forms --- */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 }
