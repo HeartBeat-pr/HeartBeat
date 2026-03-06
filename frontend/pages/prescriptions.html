@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescriptions — HeartBeat</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner">
+        Putting your health first by making healthcare information clear, accessible, and easy to understand.
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo">
+                <img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img">
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">Home</a>
+            <a href="/appointments" class="nav-link">Appointments</a>
+            <a href="/prescriptions" class="nav-link">Prescriptions</a>
+            <a href="/mental-health" class="nav-link">Mental Health</a>
+            <a href="/account" class="nav-link">Account Details</a>
+            <a href="/messages" class="nav-link">Messages</a>
+            <a href="/medical-history" class="nav-link">Medical History</a>
+        </div>
+        <div class="nav-right">
+            <div class="nav-profile">
+                <div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div>
+            </div>
+        </div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">☰</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/dashboard" class="nav-mobile-link">Home</a>
+        <a href="/appointments" class="nav-mobile-link">Appointments</a>
+        <a href="/prescriptions" class="nav-mobile-link">Prescriptions</a>
+        <a href="/mental-health" class="nav-mobile-link">Mental Health</a>
+        <a href="/account" class="nav-mobile-link">Account Details</a>
+        <a href="/messages" class="nav-mobile-link">Messages</a>
+        <a href="/medical-history" class="nav-mobile-link">Medical History</a>
+        <a href="/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="page-main">
+        <div class="page-accent-bar accent-prescriptions"></div>
+
+        <div class="page-header">
+            <h1>💊 Prescriptions</h1>
+            <p>Manage and order your prescriptions</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="dash-flash">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Add Prescription Form -->
+        <div class="page-card">
+            <h2>Add a Prescription</h2>
+            <form action="/prescriptions/order" method="POST" class="page-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="medication_name">Medication Name *</label>
+                        <input type="text" id="medication_name" name="medication_name" placeholder="e.g. Amoxicillin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dosage">Dosage *</label>
+                        <input type="text" id="dosage" name="dosage" placeholder="e.g. 500mg" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="frequency">Frequency *</label>
+                        <select id="frequency" name="frequency" required>
+                            <option value="">Select frequency</option>
+                            <option value="Once daily">Once daily</option>
+                            <option value="Twice daily">Twice daily</option>
+                            <option value="Three times daily">Three times daily</option>
+                            <option value="Every 4 hours">Every 4 hours</option>
+                            <option value="As needed">As needed</option>
+                            <option value="Weekly">Weekly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="prescribed_by">Prescribed By</label>
+                        <input type="text" id="prescribed_by" name="prescribed_by" placeholder="e.g. Dr. Smith">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_date">Start Date *</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">End Date</label>
+                        <input type="date" id="end_date" name="end_date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Any additional notes..."></textarea>
+                </div>
+                <button type="submit" class="btn-page btn-prescriptions">Add Prescription</button>
+            </form>
+        </div>
+
+        <!-- Active Prescriptions -->
+        <div class="page-card">
+            <h2>Active Prescriptions</h2>
+            {% if active %}
+                {% for rx in active %}
+                    <div class="record-item">
+                        <div class="record-header">
+                            <h3>{{ rx.medication_name }} — {{ rx.dosage }}</h3>
+                            <span class="record-badge badge-upcoming">Active</span>
+                        </div>
+                        <p>💊 {{ rx.frequency }}</p>
+                        <p>📅 Started: {{ rx.start_date.strftime('%d %B %Y') }}</p>
+                        {% if rx.end_date %}<p>🏁 Ends: {{ rx.end_date.strftime('%d %B %Y') }}</p>{% endif %}
+                        {% if rx.prescribed_by %}<p>👨‍⚕️ Prescribed by: {{ rx.prescribed_by }}</p>{% endif %}
+                        {% if rx.notes %}<p>📝 {{ rx.notes }}</p>{% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">💊</div>
+                    <h3>No active prescriptions</h3>
+                    <p>Use the form above to add your prescriptions.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Past Prescriptions -->
+        <div class="page-card">
+            <h2>Prescription History</h2>
+            {% if past %}
+                {% for rx in past %}
+                    <div class="record-item">
+                        <div class="record-header">
+                            <h3>{{ rx.medication_name }} — {{ rx.dosage }}</h3>
+                            <span class="record-badge badge-{{ rx.status }}">{{ rx.status | capitalize }}</span>
+                        </div>
+                        <p>💊 {{ rx.frequency }}</p>
+                        <p>📅 {{ rx.start_date.strftime('%d %B %Y') }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📜</div>
+                    <h3>No previous prescriptions</h3>
+                    <p>Past prescriptions will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="bottom-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Calendar</span></a>
+        <a href="/dashboard" class="bottom-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+        <a href="#" class="bottom-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+    </nav>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
