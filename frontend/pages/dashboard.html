@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — HeartBeat</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- ===== TOP BANNER ===== -->
+    <div class="top-banner">
+        Putting your health first by making healthcare information clear, accessible, and easy to understand.
+    </div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo">
+                <img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img">
+            </a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link active">Home</a>
+            <a href="/appointments" class="nav-link">Appointments</a>
+            <a href="/prescriptions" class="nav-link">Prescriptions</a>
+            <a href="/mental-health" class="nav-link">Mental Health</a>
+            <a href="/account" class="nav-link">Account Details</a>
+            <a href="/messages" class="nav-link">Messages</a>
+            <a href="/medical-history" class="nav-link">Medical History</a>
+        </div>
+
+        <div class="nav-right">
+            <div class="nav-profile">
+                <div class="nav-profile-icon">
+                    {{ session['user_name'][0] | upper }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">☰</button>
+    </nav>
+
+    <!-- Mobile Nav Menu -->
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/dashboard" class="nav-mobile-link active">Home</a>
+        <a href="/appointments" class="nav-mobile-link">Appointments</a>
+        <a href="/prescriptions" class="nav-mobile-link">Prescriptions</a>
+        <a href="mental-health" class="nav-mobile-link">Mental Health</a>
+        <a href="account" class="nav-mobile-link">Account Details</a>
+        <a href="messages" class="nav-mobile-link">Messages</a>
+        <a href="medical-history" class="nav-mobile-link">Medical History</a>
+        <a href="/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="dash-main">
+
+        <!-- Welcome Section -->
+        <section class="dash-welcome">
+            <div class="dash-welcome-text">
+                <h1>Hello, {{ session['user_name'] }}! 👋</h1>
+                <p>How can we help you today?</p>
+            </div>
+            <a href="/logout" class="btn btn-outline btn-sm dash-logout-btn">Log Out</a>
+        </section>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="dash-flash">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- ===== ACTION CARDS ===== -->
+        <section class="action-cards">
+
+            <a href="/appointments" class="action-card">
+                <div class="action-card-icon">
+                    <img src="/images/bookappointment.png" alt="Book An Appointment">
+                </div>
+                <span class="action-card-title">Book An Appointment</span>
+            </a>
+
+            <a href="/medical-history" class="action-card">
+                <div class="action-card-icon">
+                    <img src="/images/medicalhistory.png" alt="View Medical History">
+                </div>
+                <span class="action-card-title">View Medical History</span>
+            </a>
+
+            <a href="/prescriptions" class="action-card">
+                <div class="action-card-icon">
+                    <img src="/images/prescription.png" alt="Order a Prescription">
+                </div>
+                <span class="action-card-title">Order a Prescription</span>
+            </a>
+
+            <a href="/mental-health" class="action-card">
+                <div class="action-card-icon">
+                    <img src="/images/wellbeing.png" alt="Mental Health & Well Being">
+                </div>
+                <span class="action-card-title">Mental Health & Well Being</span>
+            </a>
+
+        </section>
+
+        <!-- ===== NOTIFICATIONS ===== -->
+        <section class="dash-notifications">
+            <div class="dash-notifications-header">
+                <h2>Notifications</h2>
+                <a href="#" class="dash-see-all">See All</a>
+            </div>
+            <div class="dash-notification-list">
+                <div class="dash-notification-item">
+                    <span class="dash-notification-dot"></span>
+                    <p>Welcome to HeartBeat! Complete your profile to get started.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== BOTTOM NAV (Mobile Only) ===== -->
+    <nav class="bottom-nav">
+        <a href="#" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>Calendar</span>
+        </a>
+        <a href="/dashboard" class="bottom-nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="#" class="bottom-nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="/js/main.js"></script>
+
+</body>
+</html>
