@@ -1,13 +1,13 @@
 # ==========================================
-# HEARTBEAT - Main Application
+# HEARTBEAT - Main Application (v2)
 # ==========================================
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from dotenv import load_dotenv
 import mysql.connector
 import bcrypt
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -127,7 +127,24 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Get most recent completed appointment for Recent Activity
+    cursor.execute("""
+        SELECT a.*, d.name as doc_name, d.specialty, d.medical_centre, d.location, d.rating, d.image_url
+        FROM appointments a
+        JOIN doctors d ON a.doctor_id = d.id
+        WHERE a.user_id = %s
+        ORDER BY a.appointment_date DESC, a.appointment_time DESC
+        LIMIT 1
+    """, (session['user_id'],))
+    recent_appointment = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+
+    return render_template('dashboard.html', recent_appointment=recent_appointment)
 
 
 # ==========================================
@@ -140,51 +157,135 @@ def appointments():
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
+    # Get all doctors
+    cursor.execute("SELECT * FROM doctors ORDER BY name")
+    doctors = cursor.fetchall()
+
     # Upcoming appointments
-    cursor.execute(
-        "SELECT * FROM appointments WHERE user_id = %s AND status = 'upcoming' ORDER BY appointment_date, appointment_time",
-        (session['user_id'],)
-    )
+    cursor.execute("""
+        SELECT a.*, d.name as doc_name, d.specialty, d.medical_centre, d.location, d.rating
+        FROM appointments a
+        JOIN doctors d ON a.doctor_id = d.id
+        WHERE a.user_id = %s AND a.status = 'upcoming'
+        ORDER BY a.appointment_date, a.appointment_time
+    """, (session['user_id'],))
     upcoming = cursor.fetchall()
 
     # Past appointments
-    cursor.execute(
-        "SELECT * FROM appointments WHERE user_id = %s AND status IN ('completed', 'cancelled') ORDER BY appointment_date DESC",
-        (session['user_id'],)
-    )
+    cursor.execute("""
+        SELECT a.*, d.name as doc_name, d.specialty, d.medical_centre, d.location, d.rating
+        FROM appointments a
+        JOIN doctors d ON a.doctor_id = d.id
+        WHERE a.user_id = %s AND a.status IN ('completed', 'cancelled')
+        ORDER BY a.appointment_date DESC
+    """, (session['user_id'],))
     past = cursor.fetchall()
 
     cursor.close()
     db.close()
 
-    return render_template('appointments.html', upcoming=upcoming, past=past)
+    return render_template('appointments.html', doctors=doctors, upcoming=upcoming, past=past)
+
+
+@app.route('/api/doctor-availability/<int:doctor_id>')
+@login_required
+def doctor_availability(doctor_id):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+
+    # Get doctor's availability
+    cursor.execute("""
+        SELECT * FROM doctor_availability WHERE doctor_id = %s ORDER BY FIELD(day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+    """, (doctor_id,))
+    availability = cursor.fetchall()
+
+    # Get doctor info
+    cursor.execute("SELECT * FROM doctors WHERE id = %s", (doctor_id,))
+    doctor = cursor.fetchone()
+
+    # Get existing appointments for this doctor (to block taken slots)
+    cursor.execute("""
+        SELECT appointment_date, appointment_time FROM appointments
+        WHERE doctor_id = %s AND status = 'upcoming'
+    """, (doctor_id,))
+    booked_raw = cursor.fetchall()
+
+    booked = []
+    for b in booked_raw:
+        booked.append({
+            'date': b['appointment_date'].isoformat(),
+            'time': str(b['appointment_time'])
+        })
+
+    cursor.close()
+    db.close()
+
+    # Convert availability for JSON
+    avail_data = []
+    for a in availability:
+        avail_data.append({
+            'day': a['day_of_week'],
+            'start': str(a['start_time']),
+            'end': str(a['end_time']),
+            'slot_duration': a['slot_duration']
+        })
+
+    return jsonify({
+        'doctor': {
+            'id': doctor['id'],
+            'name': doctor['name'],
+            'specialty': doctor['specialty'],
+            'medical_centre': doctor['medical_centre'],
+            'location': doctor['location'],
+            'rating': float(doctor['rating'])
+        },
+        'availability': avail_data,
+        'booked': booked
+    })
 
 
 @app.route('/appointments/book', methods=['POST'])
 @login_required
 def book_appointment():
-    doctor_name = request.form.get('doctor_name', '').strip()
-    specialty = request.form.get('specialty', '').strip()
+    doctor_id = request.form.get('doctor_id', '')
     appointment_date = request.form.get('appointment_date', '')
     appointment_time = request.form.get('appointment_time', '')
-    location = request.form.get('location', '').strip()
     notes = request.form.get('notes', '').strip()
 
-    if not doctor_name or not specialty or not appointment_date or not appointment_time:
-        flash('Please fill in all required fields.', 'error')
+    if not doctor_id or not appointment_date or not appointment_time:
+        flash('Please select a doctor, date, and time.', 'error')
         return redirect(url_for('appointments'))
 
+    # Check the slot isn't already taken
     db = get_db()
-    cursor = db.cursor()
-    cursor.execute(
-        "INSERT INTO appointments (user_id, doctor_name, specialty, appointment_date, appointment_time, location, notes) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-        (session['user_id'], doctor_name, specialty, appointment_date, appointment_time, location, notes)
-    )
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT id FROM appointments
+        WHERE doctor_id = %s AND appointment_date = %s AND appointment_time = %s AND status = 'upcoming'
+    """, (doctor_id, appointment_date, appointment_time))
+    existing = cursor.fetchone()
+
+    if existing:
+        flash('That time slot is already booked. Please choose another.', 'error')
+        cursor.close()
+        db.close()
+        return redirect(url_for('appointments'))
+
+    # Get doctor details for the appointment record
+    cursor.execute("SELECT name, specialty FROM doctors WHERE id = %s", (doctor_id,))
+    doctor = cursor.fetchone()
+
+    cursor.execute("""
+        INSERT INTO appointments (user_id, doctor_id, doctor_name, specialty, appointment_date, appointment_time, notes)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (session['user_id'], doctor_id, doctor['name'], doctor['specialty'], appointment_date, appointment_time, notes))
+
     db.commit()
     cursor.close()
     db.close()
 
-    flash('Appointment booked successfully!', 'success')
+    flash('Appointment booked with ' + doctor['name'] + '!', 'success')
     return redirect(url_for('appointments'))
 
 
@@ -215,50 +316,67 @@ def prescriptions():
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
-    cursor.execute(
-        "SELECT * FROM prescriptions WHERE user_id = %s AND status = 'active' ORDER BY start_date DESC",
-        (session['user_id'],)
-    )
-    active = cursor.fetchall()
+    # Doctor-prescribed medications
+    cursor.execute("""
+        SELECT * FROM prescriptions WHERE user_id = %s AND status = 'active' ORDER BY start_date DESC
+    """, (session['user_id'],))
+    prescribed = cursor.fetchall()
 
-    cursor.execute(
-        "SELECT * FROM prescriptions WHERE user_id = %s AND status IN ('completed', 'cancelled') ORDER BY start_date DESC",
-        (session['user_id'],)
-    )
-    past = cursor.fetchall()
+    cursor.execute("""
+        SELECT * FROM prescriptions WHERE user_id = %s AND status IN ('completed', 'cancelled') ORDER BY start_date DESC
+    """, (session['user_id'],))
+    past_prescribed = cursor.fetchall()
+
+    # OTC medications available
+    cursor.execute("SELECT * FROM otc_medications ORDER BY category, name")
+    otc_meds = cursor.fetchall()
+
+    # User's OTC orders
+    cursor.execute("""
+        SELECT o.*, m.name as med_name, m.dosage, m.category, m.price
+        FROM otc_orders o
+        JOIN otc_medications m ON o.medication_id = m.id
+        WHERE o.user_id = %s
+        ORDER BY o.ordered_at DESC
+    """, (session['user_id'],))
+    otc_orders = cursor.fetchall()
 
     cursor.close()
     db.close()
 
-    return render_template('prescriptions.html', active=active, past=past)
+    return render_template('prescriptions.html',
+        prescribed=prescribed,
+        past_prescribed=past_prescribed,
+        otc_meds=otc_meds,
+        otc_orders=otc_orders
+    )
 
 
-@app.route('/prescriptions/order', methods=['POST'])
+@app.route('/prescriptions/order-otc', methods=['POST'])
 @login_required
-def order_prescription():
-    medication_name = request.form.get('medication_name', '').strip()
-    dosage = request.form.get('dosage', '').strip()
-    frequency = request.form.get('frequency', '').strip()
-    prescribed_by = request.form.get('prescribed_by', '').strip()
-    start_date = request.form.get('start_date', '')
-    end_date = request.form.get('end_date', '') or None
-    notes = request.form.get('notes', '').strip()
+def order_otc():
+    medication_id = request.form.get('medication_id', '')
+    quantity = request.form.get('quantity', '1')
 
-    if not medication_name or not dosage or not frequency or not start_date:
-        flash('Please fill in all required fields.', 'error')
+    if not medication_id:
+        flash('Please select a medication.', 'error')
         return redirect(url_for('prescriptions'))
 
     db = get_db()
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("SELECT name FROM otc_medications WHERE id = %s", (medication_id,))
+    med = cursor.fetchone()
+
     cursor.execute(
-        "INSERT INTO prescriptions (user_id, medication_name, dosage, frequency, prescribed_by, start_date, end_date, notes) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-        (session['user_id'], medication_name, dosage, frequency, prescribed_by, start_date, end_date, notes)
+        "INSERT INTO otc_orders (user_id, medication_id, quantity) VALUES (%s, %s, %s)",
+        (session['user_id'], medication_id, quantity)
     )
     db.commit()
     cursor.close()
     db.close()
 
-    flash('Prescription added successfully!', 'success')
+    flash(med['name'] + ' ordered successfully! Collect from your pharmacy.', 'success')
     return redirect(url_for('prescriptions'))
 
 
@@ -361,11 +479,11 @@ def log_mood():
     db.close()
 
     mood_messages = {
-        'great': "That's wonderful! Keep up the positive energy! 🌟",
-        'good': "Glad to hear you're doing well! 😊",
-        'okay': "It's okay to have neutral days. Take it easy. 💙",
-        'not_great': "Sorry to hear that. Remember, it's okay to ask for help. 💛",
-        'struggling': "We're here for you. Please reach out to someone you trust. 💚"
+        'great': "That's wonderful! Keep up the positive energy! &#127775;",
+        'good': "Glad to hear you're doing well! &#128522;",
+        'okay': "It's okay to have neutral days. Take it easy. &#128153;",
+        'not_great': "Sorry to hear that. Remember, it's okay to ask for help. &#128155;",
+        'struggling': "We're here for you. Please reach out to someone you trust. &#128154;"
     }
 
     flash(mood_messages.get(mood, 'Mood logged successfully!'), 'success')
