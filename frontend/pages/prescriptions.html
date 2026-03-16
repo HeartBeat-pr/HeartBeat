@@ -14,9 +14,7 @@
 
     <nav class="navbar">
         <div class="nav-left">
-            <a href="/dashboard" class="nav-logo">
-                <img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img">
-            </a>
+            <a href="/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
         </div>
         <div class="nav-links">
             <a href="/dashboard" class="nav-link">Home</a>
@@ -27,12 +25,8 @@
             <a href="/messages" class="nav-link">Messages</a>
             <a href="/medical-history" class="nav-link">Medical History</a>
         </div>
-        <div class="nav-right">
-            <div class="nav-profile">
-                <div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div>
-            </div>
-        </div>
-        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">☰</button>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
     </nav>
 
     <div class="nav-mobile-menu" id="mobileMenu">
@@ -50,8 +44,8 @@
         <div class="page-accent-bar accent-prescriptions"></div>
 
         <div class="page-header">
-            <h1>💊 Prescriptions</h1>
-            <p>Manage and order your prescriptions</p>
+            <h1>&#128138; Prescriptions</h1>
+            <p>Your prescribed medications and over-the-counter orders</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,104 +58,113 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Add Prescription Form -->
+        <!-- Doctor-Prescribed Medications -->
         <div class="page-card">
-            <h2>Add a Prescription</h2>
-            <form action="/prescriptions/order" method="POST" class="page-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="medication_name">Medication Name *</label>
-                        <input type="text" id="medication_name" name="medication_name" placeholder="e.g. Amoxicillin" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="dosage">Dosage *</label>
-                        <input type="text" id="dosage" name="dosage" placeholder="e.g. 500mg" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="frequency">Frequency *</label>
-                        <select id="frequency" name="frequency" required>
-                            <option value="">Select frequency</option>
-                            <option value="Once daily">Once daily</option>
-                            <option value="Twice daily">Twice daily</option>
-                            <option value="Three times daily">Three times daily</option>
-                            <option value="Every 4 hours">Every 4 hours</option>
-                            <option value="As needed">As needed</option>
-                            <option value="Weekly">Weekly</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="prescribed_by">Prescribed By</label>
-                        <input type="text" id="prescribed_by" name="prescribed_by" placeholder="e.g. Dr. Smith">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="start_date">Start Date *</label>
-                        <input type="date" id="start_date" name="start_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="end_date">End Date</label>
-                        <input type="date" id="end_date" name="end_date">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notes</label>
-                    <textarea id="notes" name="notes" rows="3" placeholder="Any additional notes..."></textarea>
-                </div>
-                <button type="submit" class="btn-page btn-prescriptions">Add Prescription</button>
-            </form>
-        </div>
-
-        <!-- Active Prescriptions -->
-        <div class="page-card">
-            <h2>Active Prescriptions</h2>
-            {% if active %}
-                {% for rx in active %}
+            <h2>&#129658; Doctor-Prescribed Medications</h2>
+            <p style="color: var(--grey); margin-bottom: var(--spacing-md); font-size: var(--font-size-sm);">
+                These medications have been prescribed to you by your doctor. Contact your GP to request changes.
+            </p>
+            {% if prescribed %}
+                {% for rx in prescribed %}
                     <div class="record-item">
                         <div class="record-header">
                             <h3>{{ rx.medication_name }} — {{ rx.dosage }}</h3>
                             <span class="record-badge badge-upcoming">Active</span>
                         </div>
-                        <p>💊 {{ rx.frequency }}</p>
-                        <p>📅 Started: {{ rx.start_date.strftime('%d %B %Y') }}</p>
-                        {% if rx.end_date %}<p>🏁 Ends: {{ rx.end_date.strftime('%d %B %Y') }}</p>{% endif %}
-                        {% if rx.prescribed_by %}<p>👨‍⚕️ Prescribed by: {{ rx.prescribed_by }}</p>{% endif %}
-                        {% if rx.notes %}<p>📝 {{ rx.notes }}</p>{% endif %}
+                        <p>&#128138; {{ rx.frequency }}</p>
+                        <p>&#128197; Started: {{ rx.start_date.strftime('%d %B %Y') }}</p>
+                        {% if rx.end_date %}<p>&#127937; Ends: {{ rx.end_date.strftime('%d %B %Y') }}</p>{% endif %}
+                        {% if rx.prescribed_by %}<p>&#129658; Prescribed by: {{ rx.prescribed_by }}</p>{% endif %}
+                        {% if rx.notes %}<p>&#128221; {{ rx.notes }}</p>{% endif %}
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-state-icon">💊</div>
+                    <div class="empty-state-icon">&#128203;</div>
                     <h3>No active prescriptions</h3>
-                    <p>Use the form above to add your prescriptions.</p>
+                    <p>Medications prescribed by your doctor will appear here.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Order OTC Medication -->
+        <div class="page-card">
+            <h2>&#128722; Order Over-the-Counter Medication</h2>
+            <p style="color: var(--grey); margin-bottom: var(--spacing-lg); font-size: var(--font-size-sm);">
+                Order common medications for collection at your local pharmacy.
+            </p>
+
+            <form action="/prescriptions/order-otc" method="POST" class="page-form">
+                <div class="otc-grid">
+                    {% for med in otc_meds %}
+                    <label class="otc-card" for="med_{{ med.id }}">
+                        <input type="radio" id="med_{{ med.id }}" name="medication_id" value="{{ med.id }}" required>
+                        <div class="otc-card-content">
+                            <h4>{{ med.name }}</h4>
+                            <span class="otc-category">{{ med.category }}</span>
+                            <p class="otc-dosage">{{ med.dosage }}</p>
+                            <p class="otc-desc">{{ med.description }}</p>
+                            <span class="otc-price">&#163;{{ "%.2f" | format(med.price) }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="form-row" style="margin-top: var(--spacing-lg);">
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <select id="quantity" name="quantity">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button type="submit" class="btn-page btn-prescriptions" style="width: 100%;">Order Medication</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- OTC Order History -->
+        <div class="page-card">
+            <h2>&#128230; Order History</h2>
+            {% if otc_orders %}
+                {% for order in otc_orders %}
+                    <div class="record-item">
+                        <div class="record-header">
+                            <h3>{{ order.med_name }} — {{ order.dosage }}</h3>
+                            <span class="record-badge badge-{{ order.status }}">{{ order.status | capitalize }}</span>
+                        </div>
+                        <p>&#128230; Qty: {{ order.quantity }} | &#163;{{ "%.2f" | format(order.price * order.quantity) }}</p>
+                        <p>&#128197; Ordered: {{ order.ordered_at.strftime('%d %B %Y at %H:%M') }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128230;</div>
+                    <h3>No orders yet</h3>
+                    <p>Your medication orders will appear here.</p>
                 </div>
             {% endif %}
         </div>
 
         <!-- Past Prescriptions -->
+        {% if past_prescribed %}
         <div class="page-card">
             <h2>Prescription History</h2>
-            {% if past %}
-                {% for rx in past %}
-                    <div class="record-item">
-                        <div class="record-header">
-                            <h3>{{ rx.medication_name }} — {{ rx.dosage }}</h3>
-                            <span class="record-badge badge-{{ rx.status }}">{{ rx.status | capitalize }}</span>
-                        </div>
-                        <p>💊 {{ rx.frequency }}</p>
-                        <p>📅 {{ rx.start_date.strftime('%d %B %Y') }}</p>
+            {% for rx in past_prescribed %}
+                <div class="record-item">
+                    <div class="record-header">
+                        <h3>{{ rx.medication_name }} — {{ rx.dosage }}</h3>
+                        <span class="record-badge badge-{{ rx.status }}">{{ rx.status | capitalize }}</span>
                     </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📜</div>
-                    <h3>No previous prescriptions</h3>
-                    <p>Past prescriptions will appear here.</p>
+                    <p>&#128138; {{ rx.frequency }}</p>
+                    <p>&#128197; {{ rx.start_date.strftime('%d %B %Y') }}</p>
                 </div>
-            {% endif %}
+            {% endfor %}
         </div>
+        {% endif %}
     </main>
 
     <nav class="bottom-nav">
