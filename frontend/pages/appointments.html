@@ -14,9 +14,7 @@
 
     <nav class="navbar">
         <div class="nav-left">
-            <a href="/dashboard" class="nav-logo">
-                <img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img">
-            </a>
+            <a href="/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
         </div>
         <div class="nav-links">
             <a href="/dashboard" class="nav-link">Home</a>
@@ -27,12 +25,8 @@
             <a href="/messages" class="nav-link">Messages</a>
             <a href="/medical-history" class="nav-link">Medical History</a>
         </div>
-        <div class="nav-right">
-            <div class="nav-profile">
-                <div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div>
-            </div>
-        </div>
-        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">☰</button>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
     </nav>
 
     <div class="nav-mobile-menu" id="mobileMenu">
@@ -50,8 +44,8 @@
         <div class="page-accent-bar accent-appointments"></div>
 
         <div class="page-header">
-            <h1>📅 Appointments</h1>
-            <p>Manage your upcoming and past appointments</p>
+            <h1>&#128197; Appointments</h1>
+            <p>Book and manage your appointments</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,50 +58,55 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Book Appointment Form -->
+        <!-- Book Appointment -->
         <div class="page-card">
             <h2>Book an Appointment</h2>
-            <form action="/appointments/book" method="POST" class="page-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="doctor_name">Doctor Name *</label>
-                        <input type="text" id="doctor_name" name="doctor_name" placeholder="e.g. Dr. Smith" required>
+
+            <!-- Step 1: Select Doctor -->
+            <div class="doctor-grid">
+                {% for doctor in doctors %}
+                <div class="doctor-select-card" data-doctor-id="{{ doctor.id }}" onclick="selectDoctor(this, {{ doctor.id }})">
+                    <div class="doctor-select-header">
+                        <h3>{{ doctor.name }}</h3>
+                        <span class="doctor-rating">&#11088; {{ doctor.rating }}</span>
                     </div>
-                    <div class="form-group">
-                        <label for="specialty">Specialty *</label>
-                        <select id="specialty" name="specialty" required>
-                            <option value="">Select specialty</option>
-                            <option value="General Practitioner">General Practitioner</option>
-                            <option value="Dentist">Dentist</option>
-                            <option value="Cardiologist">Cardiologist</option>
-                            <option value="Dermatologist">Dermatologist</option>
-                            <option value="Ophthalmologist">Ophthalmologist</option>
-                            <option value="Physiotherapist">Physiotherapist</option>
-                            <option value="Psychiatrist">Psychiatrist</option>
-                            <option value="Other">Other</option>
-                        </select>
+                    <p class="doctor-specialty">{{ doctor.specialty }}</p>
+                    <p class="doctor-location">&#127973; {{ doctor.medical_centre }}</p>
+                    <p class="doctor-location">&#128205; {{ doctor.location }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Step 2: Select Date & Time (shown after doctor selection) -->
+            <div id="bookingForm" class="booking-form" style="display: none;">
+                <form action="/appointments/book" method="POST" class="page-form">
+                    <input type="hidden" id="doctor_id" name="doctor_id" value="">
+
+                    <div id="selectedDoctorInfo" class="selected-doctor-info"></div>
+
+                    <div id="availabilityInfo" class="availability-info"></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appointment_date">Select Date *</label>
+                            <input type="date" id="appointment_date" name="appointment_date" required onchange="loadTimeSlots()">
+                        </div>
+                        <div class="form-group">
+                            <label for="appointment_time">Select Time *</label>
+                            <select id="appointment_time" name="appointment_time" required>
+                                <option value="">Select a date first</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="form-row">
+
                     <div class="form-group">
-                        <label for="appointment_date">Date *</label>
-                        <input type="date" id="appointment_date" name="appointment_date" required>
+                        <label for="notes">Notes (optional)</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Any symptoms or reason for visit..."></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="appointment_time">Time *</label>
-                        <input type="time" id="appointment_time" name="appointment_time" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="location">Location</label>
-                    <input type="text" id="location" name="location" placeholder="e.g. Huddersfield Medical Centre">
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notes</label>
-                    <textarea id="notes" name="notes" rows="3" placeholder="Any additional notes..."></textarea>
-                </div>
-                <button type="submit" class="btn-page btn-appointments">Book Appointment</button>
-            </form>
+
+                    <button type="submit" class="btn-page btn-appointments">Confirm Booking</button>
+                </form>
+            </div>
         </div>
 
         <!-- Upcoming Appointments -->
@@ -117,20 +116,21 @@
                 {% for appt in upcoming %}
                     <div class="record-item">
                         <div class="record-header">
-                            <h3>{{ appt.doctor_name }} — {{ appt.specialty }}</h3>
+                            <h3>{{ appt.doc_name }} — {{ appt.specialty }}</h3>
                             <span class="record-badge badge-upcoming">Upcoming</span>
                         </div>
-                        <p>📅 {{ appt.appointment_date.strftime('%d %B %Y') }} at {{ appt.appointment_time.strftime('%H:%M') if appt.appointment_time is string else (appt.appointment_date.strftime('%d %B %Y')) }}</p>
-                        {% if appt.location %}<p>📍 {{ appt.location }}</p>{% endif %}
-                        {% if appt.notes %}<p>📝 {{ appt.notes }}</p>{% endif %}
+                        <p>&#128197; {{ appt.appointment_date.strftime('%A, %d %B %Y') }} at {{ (appt.appointment_time | string)[:5] }}</p>
+                        <p>&#127973; {{ appt.medical_centre }}</p>
+                        <p>&#128205; {{ appt.location }}</p>
+                        {% if appt.notes %}<p>&#128221; {{ appt.notes }}</p>{% endif %}
                         <a href="/appointments/cancel/{{ appt.id }}" class="btn-page btn-cancel" onclick="return confirm('Cancel this appointment?')">Cancel</a>
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-icon">&#128203;</div>
                     <h3>No upcoming appointments</h3>
-                    <p>Use the form above to book your first appointment.</p>
+                    <p>Select a doctor above to book your first appointment.</p>
                 </div>
             {% endif %}
         </div>
@@ -142,17 +142,17 @@
                 {% for appt in past %}
                     <div class="record-item">
                         <div class="record-header">
-                            <h3>{{ appt.doctor_name }} — {{ appt.specialty }}</h3>
+                            <h3>{{ appt.doc_name }} — {{ appt.specialty }}</h3>
                             <span class="record-badge badge-{{ appt.status }}">{{ appt.status | capitalize }}</span>
                         </div>
-                        <p>📅 {{ appt.appointment_date.strftime('%d %B %Y') }}</p>
-                        {% if appt.location %}<p>📍 {{ appt.location }}</p>{% endif %}
-                        {% if appt.notes %}<p>📝 {{ appt.notes }}</p>{% endif %}
+                        <p>&#128197; {{ appt.appointment_date.strftime('%d %B %Y') }}</p>
+                        <p>&#127973; {{ appt.medical_centre }}</p>
+                        {% if appt.notes %}<p>&#128221; {{ appt.notes }}</p>{% endif %}
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-state-icon">🕐</div>
+                    <div class="empty-state-icon">&#128336;</div>
                     <h3>No past appointments</h3>
                     <p>Your appointment history will appear here.</p>
                 </div>
@@ -167,5 +167,6 @@
     </nav>
 
     <script src="/js/main.js"></script>
+    <script src="/js/appointments.js"></script>
 </body>
 </html>
