@@ -127,6 +127,37 @@
             </div>
         </section>
 
+                <!-- ===== RECENT ACTIVITY ===== -->
+        <section class="recent-activity">
+            <h2>Recent Activity</h2>
+            <p class="recent-activity-sub">&#9989; This section displays your most recent healthcare interactions.</p>
+
+            {% if recent_appointment %}
+            <div class="doctor-card">
+                <div class="doctor-card-left">
+                    <div class="doctor-card-avatar">&#129658;</div>
+                    <div class="doctor-card-info">
+                        <h3>{{ recent_appointment.doc_name }}</h3>
+                        <p class="doctor-card-specialty">{{ recent_appointment.specialty }} &#11088; {{ recent_appointment.rating }}</p>
+                        <p class="doctor-card-location">{{ recent_appointment.medical_centre }}, {{ recent_appointment.location }}</p>
+                        <div class="doctor-card-notes">
+                            <h4>Appointment Notes</h4>
+                            <p>{{ recent_appointment.notes if recent_appointment.notes else 'No notes recorded for this appointment.' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="page-card">
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128203;</div>
+                    <h3>No recent activity</h3>
+                    <p>Book an appointment to see your activity here.</p>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
     </main>
 
     <!-- ===== BOTTOM NAV (Mobile Only) ===== -->
