@@ -14,10 +14,37 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ===== DOCTORS =====
+CREATE TABLE IF NOT EXISTS doctors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    specialty VARCHAR(100) NOT NULL,
+    medical_centre VARCHAR(200) NOT NULL,
+    location VARCHAR(200) NOT NULL,
+    phone VARCHAR(20),
+    rating DECIMAL(2,1) DEFAULT 4.5,
+    image_url VARCHAR(255) DEFAULT '/images/doctor-default.png',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===== DOCTOR AVAILABILITY =====
+CREATE TABLE IF NOT EXISTS doctor_availability (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    doctor_id INT NOT NULL,
+    day_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday') NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    slot_duration INT DEFAULT 30,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+);
+
 -- ===== APPOINTMENTS =====
 CREATE TABLE IF NOT EXISTS appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    doctor_id INT,
     doctor_name VARCHAR(100) NOT NULL,
     specialty VARCHAR(100) NOT NULL,
     appointment_date DATE NOT NULL,
@@ -26,13 +53,15 @@ CREATE TABLE IF NOT EXISTS appointments (
     notes TEXT,
     status ENUM('upcoming', 'completed', 'cancelled') DEFAULT 'upcoming',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id)
 );
 
 -- ===== PRESCRIPTIONS =====
 CREATE TABLE IF NOT EXISTS prescriptions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    doctor_id INT,
     medication_name VARCHAR(150) NOT NULL,
     dosage VARCHAR(100) NOT NULL,
     frequency VARCHAR(100) NOT NULL,
@@ -42,7 +71,8 @@ CREATE TABLE IF NOT EXISTS prescriptions (
     status ENUM('active', 'completed', 'cancelled') DEFAULT 'active',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id)
 );
 
 -- ===== MEDICAL HISTORY =====
@@ -71,49 +101,15 @@ CREATE TABLE IF NOT EXISTS mood_logs (
 -- ===== MESSAGES =====
 CREATE TABLE IF NOT EXISTS messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    sender_name VARCHAR(100) NOT NULL,
+    sender_type ENUM('patient', 'user', 'doctor') NOT NULL DEFAULT 'patient',
+    sender_id INT NOT NULL,
+    receiver_type ENUM('patient', 'user', 'doctor') NOT NULL DEFAULT 'doctor',
+    receiver_id INT NOT NULL,
     subject VARCHAR(200) NOT NULL,
     body TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- ==========================================
--- HEARTBEAT SCHEMA UPDATE — v2
--- ==========================================
-
-USE heartbeat_db;
-
--- ===== DOCTORS =====
-CREATE TABLE IF NOT EXISTS doctors (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    specialty VARCHAR(100) NOT NULL,
-    medical_centre VARCHAR(200) NOT NULL,
-    location VARCHAR(200) NOT NULL,
-    phone VARCHAR(20),
-    rating DECIMAL(2,1) DEFAULT 4.5,
-    image_url VARCHAR(255) DEFAULT '/images/doctor-default.png',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- ===== DOCTOR AVAILABILITY =====
-CREATE TABLE IF NOT EXISTS doctor_availability (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    doctor_id INT NOT NULL,
-    day_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday') NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    slot_duration INT DEFAULT 30,
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
-);
-
--- ===== UPDATE APPOINTMENTS — add doctor_id column =====
-ALTER TABLE appointments
-    ADD COLUMN doctor_id INT AFTER user_id,
-    ADD FOREIGN KEY (doctor_id) REFERENCES doctors(id);
 
 -- ===== OTC MEDICATIONS =====
 CREATE TABLE IF NOT EXISTS otc_medications (
@@ -141,12 +137,12 @@ CREATE TABLE IF NOT EXISTS otc_orders (
 -- SEED DATA — Doctors
 -- ==========================================
 
-INSERT INTO doctors (name, specialty, medical_centre, location, phone, rating) VALUES
-('Dr. Sarah Johnson', 'General Practitioner', 'Huddersfield Health Centre', 'Huddersfield, England', '01484 123456', 4.8),
-('Dr. James Patel', 'Dentist', 'Lindley Dental Practice', 'Huddersfield, England', '01484 234567', 4.7),
-('Dr. Emily Chen', 'Cardiologist', 'Calderdale Royal Hospital', 'Halifax, England', '01422 345678', 4.9),
-('Dr. Michael Obi', 'Dermatologist', 'Kirkburton Health Centre', 'Huddersfield, England', '01484 456789', 4.5),
-('Dr. Amara Williams', 'Psychiatrist', 'Folly Hall Medical Centre', 'Huddersfield, England', '01484 567890', 4.6);
+INSERT INTO doctors (name, email, password, specialty, medical_centre, location, phone, rating) VALUES
+('Dr. Sarah Johnson', 'sarah.johnson@heartbeat.com', 'doctor123', 'General Practitioner', 'Huddersfield Health Centre', 'Huddersfield, England', '01484 123456', 4.8),
+('Dr. James Patel', 'james.patel@heartbeat.com', 'doctor123', 'Dentist', 'Lindley Dental Practice', 'Huddersfield, England', '01484 234567', 4.7),
+('Dr. Emily Chen', 'emily.chen@heartbeat.com', 'doctor123', 'Cardiologist', 'Calderdale Royal Hospital', 'Halifax, England', '01422 345678', 4.9),
+('Dr. Michael Obi', 'michael.obi@heartbeat.com', 'doctor123', 'Dermatologist', 'Kirkburton Health Centre', 'Huddersfield, England', '01484 456789', 4.5),
+('Dr. Amara Williams', 'amara.williams@heartbeat.com', 'doctor123', 'Psychiatrist', 'Folly Hall Medical Centre', 'Huddersfield, England', '01484 567890', 4.6);
 
 -- ==========================================
 -- SEED DATA — Doctor Availability
