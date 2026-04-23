@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ doctor.name }} — HeartBeat</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner">
+        Putting your health first by making healthcare information clear, accessible, and easy to understand.
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">Home</a>
+            <a href="/appointments" class="nav-link">Appointments</a>
+            <a href="/prescriptions" class="nav-link">Prescriptions</a>
+            <a href="/mental-health" class="nav-link">Mental Health</a>
+            <a href="/account" class="nav-link">Account Details</a>
+            <a href="/messages" class="nav-link active">Messages</a>
+            <a href="/medical-history" class="nav-link">Medical History</a>
+        </div>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/dashboard" class="nav-mobile-link">Home</a>
+        <a href="/appointments" class="nav-mobile-link">Appointments</a>
+        <a href="/prescriptions" class="nav-mobile-link">Prescriptions</a>
+        <a href="/mental-health" class="nav-mobile-link">Mental Health</a>
+        <a href="/account" class="nav-mobile-link">Account Details</a>
+        <a href="/messages" class="nav-mobile-link active">Messages</a>
+        <a href="/medical-history" class="nav-mobile-link">Medical History</a>
+        <a href="/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="page-main">
+        <div class="page-accent-bar accent-messages"></div>
+
+        <div class="page-header">
+            <a href="/messages" style="color: var(--grey); font-size: 14px;">&#8592; Back to Messages</a>
+            <h1>&#128172; {{ doctor.name }}</h1>
+            <p>{{ doctor.specialty }} · {{ doctor.medical_centre }}</p>
+        </div>
+
+        {% with flash_messages = get_flashed_messages(with_categories=true) %}
+            {% if flash_messages %}
+                <div class="dash-flash">
+                    {% for category, message in flash_messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Chat Messages -->
+        <div class="chat-container">
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="chat-bubble chat-{{ msg.direction }}">
+                    <div class="chat-bubble-header">
+                        <strong>{% if msg.direction == 'sent' %}You{% else %}{{ doctor.name }}{% endif %}</strong>
+                        <span class="chat-time">{{ msg.created_at.strftime('%d %b %Y · %H:%M') }}</span>
+                    </div>
+                    {% if msg.subject %}<div class="chat-subject">{{ msg.subject }}</div>{% endif %}
+                    <p>{{ msg.body }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128172;</div>
+                    <h3>No messages yet</h3>
+                    <p>Send the first message to {{ doctor.name }}.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Reply Form -->
+        <div class="page-card">
+            <h2>Reply</h2>
+            <form action="/messages/send" method="POST" class="page-form">
+                <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                <div class="form-group">
+                    <label for="subject">Subject (optional)</label>
+                    <input type="text" id="subject" name="subject" placeholder="e.g. Question about medication">
+                </div>
+                <div class="form-group">
+                    <label for="body">Message *</label>
+                    <textarea id="body" name="body" rows="4" placeholder="Type your message..." required></textarea>
+                </div>
+                <button type="submit" class="btn-page btn-messages">Send Message</button>
+            </form>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="/calendar" class="bottom-nav-item">
+            <img src="/images/calender.png" alt="Calendar" class="bottom-nav-icon">
+            <span>Calendar</span>
+        </a>
+        <a href="/dashboard" class="bottom-nav-item">
+            <img src="/images/home.png" alt="Home" class="bottom-nav-icon">
+            <span>Home</span>
+        </a>
+        <a href="/account" class="bottom-nav-item">
+            <img src="/images/profile.png" alt="Profile" class="bottom-nav-icon">
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
