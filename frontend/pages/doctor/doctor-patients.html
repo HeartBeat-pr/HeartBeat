@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Patients — HeartBeat Doctor Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner" style="background: linear-gradient(135deg, #0073E6 0%, #005bb5 100%);">
+        HeartBeat Doctor Portal
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/doctor/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="/doctor/dashboard" class="nav-link">Dashboard</a>
+            <a href="/doctor/patients" class="nav-link active">My Patients</a>
+            <a href="/doctor/prescribe" class="nav-link">Prescribe</a>
+            <a href="/doctor/messages" class="nav-link">Messages</a>
+            <a href="/doctor/logout" class="nav-link" style="color: #cc0000;">Log Out</a>
+        </div>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon" style="background-color: #0073E6;">{{ session['doctor_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/doctor/dashboard" class="nav-mobile-link">Dashboard</a>
+        <a href="/doctor/patients" class="nav-mobile-link active">My Patients</a>
+        <a href="/doctor/prescribe" class="nav-mobile-link">Prescribe</a>
+        <a href="/doctor/messages" class="nav-mobile-link">Messages</a>
+        <a href="/doctor/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="page-main">
+        <div class="page-accent-bar" style="background-color: #0073E6;"></div>
+
+        <div class="page-header">
+            <h1>&#128100; My Patients</h1>
+            <p>Patients who have booked appointments with you</p>
+        </div>
+
+        <div class="page-card">
+            {% if patients %}
+                {% for patient in patients %}
+                <div class="record-item">
+                    <div class="record-header">
+                        <h3>{{ patient.name }}</h3>
+                        <span class="record-badge badge-type">{{ patient.appointment_count }} appointments</span>
+                    </div>
+                    <p>&#128231; {{ patient.email }}</p>
+                    <p>&#128197; Member since {{ patient.created_at.strftime('%d %B %Y') }}</p>
+                    <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <a href="/doctor/messages/conversation/{{ patient.id }}" class="btn-page btn-messages" style="margin-top: 0;">Message</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128100;</div>
+                    <h3>No patients yet</h3>
+                    <p>Patients will appear here once they book an appointment with you.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
