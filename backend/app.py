@@ -145,7 +145,7 @@ def doctor_login():
         cursor.close()
         db.close()
 
-        if doctor and doctor['password'] == password:
+        if doctor and doctor['password'] and bcrypt.checkpw(password.encode('utf-8'), doctor['password'].encode('utf-8')):
             session.clear()
             session['doctor_id'] = doctor['id']
             session['doctor_name'] = doctor['name']
@@ -426,7 +426,7 @@ def send_message():
     cursor = db.cursor()
     cursor.execute("""
         INSERT INTO messages (sender_type, sender_id, receiver_type, receiver_id, subject, body)
-        VALUES ('user', %s, 'doctor', %s, %s, %s)
+        VALUES ('patient', %s, 'doctor', %s, %s, %s)
     """, (session['user_id'], doctor_id, subject, body))
     db.commit()
     cursor.close()
