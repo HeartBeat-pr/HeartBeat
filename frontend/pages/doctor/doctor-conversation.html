@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ patient.name }} — HeartBeat Doctor Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner" style="background: linear-gradient(135deg, #0073E6 0%, #005bb5 100%);">
+        HeartBeat Doctor Portal
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/doctor/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="/doctor/dashboard" class="nav-link">Dashboard</a>
+            <a href="/doctor/patients" class="nav-link">My Patients</a>
+            <a href="/doctor/prescribe" class="nav-link">Prescribe</a>
+            <a href="/doctor/messages" class="nav-link active">Messages</a>
+            <a href="/doctor/logout" class="nav-link" style="color: #cc0000;">Log Out</a>
+        </div>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon" style="background-color: #0073E6;">{{ session['doctor_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/doctor/dashboard" class="nav-mobile-link">Dashboard</a>
+        <a href="/doctor/patients" class="nav-mobile-link">My Patients</a>
+        <a href="/doctor/prescribe" class="nav-mobile-link">Prescribe</a>
+        <a href="/doctor/messages" class="nav-mobile-link active">Messages</a>
+        <a href="/doctor/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="page-main">
+        <div class="page-accent-bar" style="background-color: #0073E6;"></div>
+
+        <div class="page-header">
+            <a href="/doctor/messages" style="color: var(--grey); font-size: 14px;">&#8592; Back to Messages</a>
+            <h1>&#128172; {{ patient.name }}</h1>
+            <p>{{ patient.email }}</p>
+        </div>
+
+        {% with flash_messages = get_flashed_messages(with_categories=true) %}
+            {% if flash_messages %}
+                <div class="dash-flash">
+                    {% for category, message in flash_messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Chat Messages -->
+        <div class="chat-container">
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="chat-bubble chat-{{ msg.direction }}">
+                    <div class="chat-bubble-header">
+                        <strong>{% if msg.direction == 'sent' %}You{% else %}{{ patient.name }}{% endif %}</strong>
+                        <span class="chat-time">{{ msg.created_at.strftime('%d %b %Y · %H:%M') }}</span>
+                    </div>
+                    {% if msg.subject %}<div class="chat-subject">{{ msg.subject }}</div>{% endif %}
+                    <p>{{ msg.body }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128172;</div>
+                    <h3>No messages yet</h3>
+                    <p>Send the first message to {{ patient.name }}.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Reply Form -->
+        <div class="page-card">
+            <h2>Reply</h2>
+            <form action="/doctor/messages/send" method="POST" class="page-form">
+                <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                <div class="form-group">
+                    <label for="subject">Subject (optional)</label>
+                    <input type="text" id="subject" name="subject" placeholder="e.g. Follow-up on appointment">
+                </div>
+                <div class="form-group">
+                    <label for="body">Message *</label>
+                    <textarea id="body" name="body" rows="4" placeholder="Type your message..." required></textarea>
+                </div>
+                <button type="submit" class="btn-page" style="background-color: #0073E6;">Send Message</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
