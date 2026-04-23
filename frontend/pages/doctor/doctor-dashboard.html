@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard — HeartBeat</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner" style="background: linear-gradient(135deg, #0073E6 0%, #005bb5 100%);">
+        HeartBeat Doctor Portal
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/doctor/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="/doctor/dashboard" class="nav-link active">Dashboard</a>
+            <a href="/doctor/patients" class="nav-link">My Patients</a>
+            <a href="/doctor/prescribe" class="nav-link">Prescribe</a>
+            <a href="/doctor/messages" class="nav-link">Messages</a>
+            <a href="/doctor/logout" class="nav-link" style="color: #cc0000;">Log Out</a>
+        </div>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon" style="background-color: #0073E6;">{{ session['doctor_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/doctor/dashboard" class="nav-mobile-link active">Dashboard</a>
+        <a href="/doctor/patients" class="nav-mobile-link">My Patients</a>
+        <a href="/doctor/prescribe" class="nav-mobile-link">Prescribe</a>
+        <a href="/doctor/messages" class="nav-mobile-link">Messages</a>
+        <a href="/doctor/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="dash-main">
+        <section class="dash-welcome">
+            <div class="dash-welcome-text">
+                <h1>Hello, {{ session['doctor_name'] }}! &#129658;</h1>
+                <p>{{ session['doctor_specialty'] }}</p>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="dash-flash">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Stats -->
+        <section class="doctor-stats">
+            <div class="doctor-stat-card">
+                <div class="doctor-stat-number">{{ todays_appointments | length }}</div>
+                <div class="doctor-stat-label">Today's Appointments</div>
+            </div>
+            <div class="doctor-stat-card">
+                <div class="doctor-stat-number">{{ upcoming_appointments | length }}</div>
+                <div class="doctor-stat-label">Upcoming</div>
+            </div>
+            <div class="doctor-stat-card">
+                <div class="doctor-stat-number">{{ total_patients }}</div>
+                <div class="doctor-stat-label">Total Patients</div>
+            </div>
+            <div class="doctor-stat-card">
+                <div class="doctor-stat-number">{{ unread_messages }}</div>
+                <div class="doctor-stat-label">Unread Messages</div>
+            </div>
+        </section>
+
+        <!-- Today's Appointments -->
+        <div class="page-card">
+            <h2>&#128197; Today's Appointments</h2>
+            {% if todays_appointments %}
+                {% for appt in todays_appointments %}
+                <div class="record-item">
+                    <div class="record-header">
+                        <h3>{{ appt.patient_name }}</h3>
+                        <span class="record-badge badge-upcoming">{{ (appt.appointment_time | string)[:5] }}</span>
+                    </div>
+                    <p>&#128231; {{ appt.patient_email }}</p>
+                    {% if appt.notes %}<p>&#128221; {{ appt.notes }}</p>{% endif %}
+                    <a href="/doctor/appointments/complete/{{ appt.id }}" class="btn-page btn-appointments" onclick="return confirm('Mark as completed?')">Mark Completed</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128203;</div>
+                    <h3>No appointments today</h3>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Upcoming -->
+        <div class="page-card">
+            <h2>&#128336; Upcoming Appointments</h2>
+            {% if upcoming_appointments %}
+                {% for appt in upcoming_appointments %}
+                <div class="record-item">
+                    <div class="record-header">
+                        <h3>{{ appt.patient_name }}</h3>
+                        <span class="record-badge badge-upcoming">{{ appt.appointment_date.strftime('%d %b %Y') }} · {{ (appt.appointment_time | string)[:5] }}</span>
+                    </div>
+                    {% if appt.notes %}<p>&#128221; {{ appt.notes }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128197;</div>
+                    <h3>No upcoming appointments</h3>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
