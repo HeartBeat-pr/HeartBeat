@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages — HeartBeat Doctor Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner" style="background: linear-gradient(135deg, #0073E6 0%, #005bb5 100%);">
+        HeartBeat Doctor Portal
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/doctor/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="/doctor/dashboard" class="nav-link">Dashboard</a>
+            <a href="/doctor/patients" class="nav-link">My Patients</a>
+            <a href="/doctor/prescribe" class="nav-link">Prescribe</a>
+            <a href="/doctor/messages" class="nav-link active">Messages</a>
+            <a href="/doctor/logout" class="nav-link" style="color: #cc0000;">Log Out</a>
+        </div>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon" style="background-color: #0073E6;">{{ session['doctor_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/doctor/dashboard" class="nav-mobile-link">Dashboard</a>
+        <a href="/doctor/patients" class="nav-mobile-link">My Patients</a>
+        <a href="/doctor/prescribe" class="nav-mobile-link">Prescribe</a>
+        <a href="/doctor/messages" class="nav-mobile-link active">Messages</a>
+        <a href="/doctor/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="page-main">
+        <div class="page-accent-bar" style="background-color: #0073E6;"></div>
+
+        <div class="page-header">
+            <h1>&#128172; Messages</h1>
+            <p>Communicate with your patients</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="dash-flash">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="page-card">
+            <h2>Conversations</h2>
+            {% if conversations %}
+                {% for convo in conversations %}
+                <a href="/doctor/messages/conversation/{{ convo.patient_id }}" class="message-item" style="text-decoration: none;">
+                    <div class="message-avatar">{{ convo.patient_name[0] | upper }}</div>
+                    <div class="message-content">
+                        <h4>{{ convo.patient_name }}
+                            {% if convo.unread > 0 %}
+                                <span class="record-badge badge-upcoming" style="margin-left: 8px;">{{ convo.unread }} new</span>
+                            {% endif %}
+                        </h4>
+                        {% if convo.last_message %}
+                            <p>{{ convo.last_message.body[:80] }}{% if convo.last_message.body|length > 80 %}...{% endif %}</p>
+                        {% endif %}
+                    </div>
+                    {% if convo.last_message %}
+                        <span class="message-time">{{ convo.last_message.created_at.strftime('%d %b') }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128172;</div>
+                    <h3>No messages yet</h3>
+                    <p>Messages from patients will appear here. You can also message patients from the <a href="/doctor/patients">My Patients</a> page.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
