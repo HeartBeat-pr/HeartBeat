@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar — HeartBeat</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="top-banner">
+        Putting your health first by making healthcare information clear, accessible, and easy to understand.
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/dashboard" class="nav-logo"><img src="/images/heartbeatlogo.png" alt="HeartBeat" class="nav-logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">Home</a>
+            <a href="/appointments" class="nav-link">Appointments</a>
+            <a href="/prescriptions" class="nav-link">Prescriptions</a>
+            <a href="/mental-health" class="nav-link">Mental Health</a>
+            <a href="/account" class="nav-link">Account Details</a>
+            <a href="/messages" class="nav-link">Messages</a>
+            <a href="/medical-history" class="nav-link">Medical History</a>
+        </div>
+        <div class="nav-right"><div class="nav-profile"><div class="nav-profile-icon">{{ session['user_name'][0] | upper }}</div></div></div>
+        <button class="nav-mobile-btn" onclick="toggleMobileMenu()">&#9776;</button>
+    </nav>
+
+    <div class="nav-mobile-menu" id="mobileMenu">
+        <a href="/dashboard" class="nav-mobile-link">Home</a>
+        <a href="/appointments" class="nav-mobile-link">Appointments</a>
+        <a href="/prescriptions" class="nav-mobile-link">Prescriptions</a>
+        <a href="/mental-health" class="nav-mobile-link">Mental Health</a>
+        <a href="/account" class="nav-mobile-link">Account Details</a>
+        <a href="/messages" class="nav-mobile-link">Messages</a>
+        <a href="/medical-history" class="nav-mobile-link">Medical History</a>
+        <a href="/logout" class="nav-mobile-link nav-mobile-logout">Log Out</a>
+    </div>
+
+    <main class="page-main">
+        <div class="page-accent-bar accent-appointments"></div>
+
+        <div class="page-header">
+            <h1>&#128197; Calendar</h1>
+            <p>View your upcoming appointments</p>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="calendar-card">
+            <div class="calendar-nav">
+                <button class="calendar-nav-btn" onclick="changeMonth(-1)">&#9664;</button>
+                <h2 id="calendarMonthYear"></h2>
+                <button class="calendar-nav-btn" onclick="changeMonth(1)">&#9654;</button>
+            </div>
+
+            <!-- Day Headers -->
+            <div class="calendar-grid calendar-header-row">
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+                <div class="calendar-day-header">Sun</div>
+            </div>
+
+            <!-- Calendar Days -->
+            <div class="calendar-grid" id="calendarDays"></div>
+        </div>
+
+        <!-- Appointment Details for Selected Day -->
+        <div class="page-card" id="dayDetails" style="display: none;">
+            <h2 id="dayDetailsTitle"></h2>
+            <div id="dayDetailsList"></div>
+        </div>
+
+        <!-- All Upcoming -->
+        <div class="page-card">
+            <h2>All Upcoming Appointments</h2>
+            {% if events %}
+                {% for event in events %}
+                <div class="record-item">
+                    <div class="record-header">
+                        <h3>{{ event.title }}</h3>
+                        <span class="record-badge badge-upcoming">{{ event.date }}</span>
+                    </div>
+                    <p>&#128336; {{ event.time }}</p>
+                    <p>&#127973; {{ event.location }}</p>
+                    {% if event.notes %}<p>&#128221; {{ event.notes }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128197;</div>
+                    <h3>No upcoming appointments</h3>
+                    <p>Book an appointment to see it on your calendar.</p>
+                    <a href="/appointments" class="btn-page btn-appointments">Book Appointment</a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="/calendar" class="bottom-nav-item">
+            <img src="/images/calendar.png" alt="Calendar" class="bottom-nav-icon">
+            <span>Calendar</span>
+        </a>
+        <a href="/dashboard" class="bottom-nav-item">
+            <img src="/images/home.png" alt="Home" class="bottom-nav-icon">
+            <span>Home</span>
+        </a>
+        <a href="/account" class="bottom-nav-item">
+            <img src="/images/profile.png" alt="Profile" class="bottom-nav-icon">
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="/js/main.js"></script>
+    <script>
+        // Pass appointments from Flask to JavaScript
+        var calendarEvents = {{ events | tojson }};
+    </script>
+    <script src="/js/calendar.js"></script>
+</body>
+</html>
