@@ -127,33 +127,45 @@
             </div>
         </section>
 
-                <!-- ===== RECENT ACTIVITY ===== -->
-        <section class="recent-activity">
-            <h2>Recent Activity</h2>
-            <p class="recent-activity-sub">&#9989; This section displays your most recent healthcare interactions.</p>
+        <!-- ===== RECENT ACTIVITY ===== -->
+        <section class="dash-section">
+            <div class="dash-section-header">
+                <h2>Recent Activity</h2>
+                <a href="/appointments" class="dash-see-all">See All</a>
+            </div>
 
-            {% if recent_appointment %}
-            <div class="doctor-card">
-                <div class="doctor-card-left">
-                    <div class="doctor-card-avatar">&#129658;</div>
-                    <div class="doctor-card-info">
-                        <h3>{{ recent_appointment.doc_name }}</h3>
-                        <p class="doctor-card-specialty">{{ recent_appointment.specialty }} &#11088; {{ recent_appointment.rating }}</p>
-                        <p class="doctor-card-location">{{ recent_appointment.medical_centre }}, {{ recent_appointment.location }}</p>
-                        <div class="doctor-card-notes">
-                            <h4>Appointment Notes</h4>
-                            <p>{{ recent_appointment.notes if recent_appointment.notes else 'No notes recorded for this appointment.' }}</p>
+            {% if recent_appt %}
+            <div class="doctor-activity-card">
+                <div class="doctor-activity-left">
+                    <div class="doctor-activity-avatar">
+                        <span>&#129658;</span>
+                    </div>
+                    <div class="doctor-activity-info">
+                        <div class="doctor-activity-top">
+                            <h3>{{ recent_appt.doctor_name }}</h3>
+                            <span class="doctor-activity-rating">&#11088; {{ recent_appt.rating }}</span>
+                        </div>
+                        <p class="doctor-activity-meta">{{ recent_appt.specialty }}</p>
+                        <p class="doctor-activity-meta">{{ recent_appt.medical_centre }} &#183; {{ recent_appt.location }}</p>
+                        <div class="doctor-activity-row">
+                            <span class="pill pill-{{ recent_appt.status }}">{{ recent_appt.status | capitalize }}</span>
+                            <span class="doctor-activity-date">
+                                {{ recent_appt.appointment_date.strftime('%a %d %b %Y') }} &#183; {{ (recent_appt.appointment_time | string)[:5] }}
+                            </span>
                         </div>
                     </div>
                 </div>
+                <div class="doctor-activity-notes">
+                    <h4>Appointment Notes</h4>
+                    <p>{{ recent_appt.notes if recent_appt.notes else 'No notes recorded for this appointment.' }}</p>
+                </div>
             </div>
             {% else %}
-            <div class="page-card">
-                <div class="empty-state">
-                    <div class="empty-state-icon">&#128203;</div>
-                    <h3>No recent activity</h3>
-                    <p>Book an appointment to see your activity here.</p>
-                </div>
+            <div class="dash-empty">
+                <div class="empty-state-icon">&#128203;</div>
+                <h3>No recent activity</h3>
+                <p>Book an appointment to see your activity here.</p>
+                <a href="/appointments" class="btn btn-primary btn-sm">Book Appointment</a>
             </div>
             {% endif %}
         </section>
@@ -162,27 +174,16 @@
 
     <!-- ===== BOTTOM NAV (Mobile Only) ===== -->
     <nav class="bottom-nav">
-        <a href="#" class="bottom-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
+        <a href="/calendar" class="bottom-nav-item">
+            <img src="/images/calendar.png" alt="Calendar" class="bottom-nav-icon">
             <span>Calendar</span>
         </a>
-        <a href="/dashboard" class="bottom-nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
+        <a href="/dashboard" class="bottom-nav-item">
+            <img src="/images/home.png" alt="Home" class="bottom-nav-icon">
             <span>Home</span>
         </a>
-        <a href="#" class="bottom-nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
+        <a href="/account" class="bottom-nav-item">
+            <img src="/images/profile.png" alt="Profile" class="bottom-nav-icon">
             <span>Profile</span>
         </a>
     </nav>
