@@ -462,6 +462,9 @@ def doctor_messages():
         cursor.execute("SELECT name, email FROM users WHERE id = %s", (pat_id,))
         patient = cursor.fetchone()
 
+        if not patient:
+            continue
+
         cursor.execute("""
             SELECT * FROM messages
             WHERE ((sender_type = 'doctor' AND sender_id = %s AND receiver_type = 'patient' AND receiver_id = %s)
